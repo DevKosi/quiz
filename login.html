@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Quiz Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="/fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Physics Quiz</h2>
+        <input type="text" id="regNumber" placeholder="Starts 10/05/2025. 11:00 AM - 12:00 PM" disabled>
+        <button onclick="login()">Start Quiz</button>
+        <p id="error" class="error"></p>
+    </div>
+
+    <script>
+        async function login() {
+            const regInput = document.getElementById("regNumber").value.trim().toUpperCase();
+            const errorElem = document.getElementById("error");
+
+            try {
+                // Load valid registration numbers
+                const res = await fetch("reg_numbers.json");
+                const validNumbers = await res.json();
+
+                // Check for previous submission on this device
+                const usedRegs = JSON.parse(localStorage.getItem("usedRegs") || "[]");
+
+                if (!validNumbers.includes(regInput)) {
+                    errorElem.textContent = "Not eligible. Please check your registration number.";
+                    return;
+                }
+
+                if (usedRegs.includes(regInput)) {
+                    errorElem.textContent = "This registration number has been used.";
+                    return;
+                }
+
+                // Save to localStorage to prevent reuse
+                usedRegs.push(regInput);
+                localStorage.setItem("usedRegs", JSON.stringify(usedRegs));
+
+                // Redirect to Google Form with reg number prefilled
+                const googleFormURL = "https://test.gclocked.com/?form=-OPqR7rQlGNFqQra5oOC" //+ encodeURIComponent(regInput);
+                window.location.href = googleFormURL;
+
+            } catch (err) {
+                errorElem.textContent = "Something went wrong. Please try again.";
+                console.error(err);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
